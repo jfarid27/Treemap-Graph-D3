@@ -14,6 +14,17 @@ function treemapGraphD3(d3){
         return edge1.value > edge2.value
     }
 
+    var edgeAttachedToNode = function(Id, Edge){
+        //Returns true if edge is linked to node with specified Id
+        // :: Id, Edge -> Boolean
+
+        if (Edge.source == Id || Edge.target == Id){
+            return true
+        }
+        return false
+
+    }
+
     var edgeLinkSelector = function(Edges, Comparator){
         //Returns list of Ids to merge after given Edges and Comparator
         // :: Edges, Comparator -> [Id, Id]
@@ -24,6 +35,14 @@ function treemapGraphD3(d3){
             return next
         }, null)
         return [winner.source, winner.target]
+    }
+
+    exports.edgeAttachedToNode = function(){
+        if (arguments.length > 0){
+            edgeAttachedToNode = arguments[0]
+            return exports
+        }
+        return edgeAttachedToNode
     }
 
     exports.edgeComparator = function(){ 

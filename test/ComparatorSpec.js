@@ -45,8 +45,28 @@ describe('Default Comparator', function(){
                 expect(result).toBe(false)
             })
         })
-        it('should return null', function(){
-            pending('TODO')
+        describe('when the second edge is null', function(){
+            var mockEdge1, mockEdge2, result
+            beforeEach(function(){
+                mockEdge1 = {'value': 1}
+                mockEdge2 = null
+                result = comparator(mockEdge1, mockEdge2)
+            })
+            it('should return true', function(){
+                expect(result).toBe(true)
+            })
         })
+        describe('when both edges are null', function(){
+            var mockEdge1, mockEdge2, result
+            beforeEach(function(){
+                mockEdge1 = null
+                mockEdge2 = null 
+                result = comparator(mockEdge2, mockEdge1)
+            })
+            it('should return false', function(){
+                expect(result).toBe(null)
+            })
+        })
+        
     })
 })
