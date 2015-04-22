@@ -4,6 +4,22 @@ function treemapGraphD3(d3){
         return
     }
 
+    var edgesAttached = function(Edges, Ids){
+        //Returns edges that are attached to specified nodes through Ids
+        // :: Edges, Ids -> Edges
+        return Edges.filter(function(edge){
+
+            return Ids.map(function(id){
+                return exports.edgeAttachedToNode(id, edge)
+            })
+            .reduce(function(statement, bool){
+                return statement || bool
+            }, false)
+
+        })
+
+    }
+
     var edgeComparator = function(edge1, edge2){
         //Returns true if edge1 is greater than edge2
         // :: Edge | Null, Edge | Null -> Boolean | Null
@@ -35,6 +51,14 @@ function treemapGraphD3(d3){
             return next
         }, null)
         return [winner.source, winner.target]
+    }
+
+    exports.edgesAttached = function(){
+        if (arguments.length > 0){
+            edgesAttached = arguments[0]
+            return exports
+        }
+        return edgesAttached
     }
 
     exports.edgeAttachedToNode = function(){
