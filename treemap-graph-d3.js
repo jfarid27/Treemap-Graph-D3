@@ -4,6 +4,18 @@ function treemapGraphD3(d3){
         return
     }
 
+    var removeEdgeFromEdges = function(Edges, Edge){
+        //Returns Edges that do not match Edge
+        // :: Edges, Edge -> Edges
+            return Edges.filter(function(edge){
+                if (edge.source == Edge.source 
+                    && edge.target == Edge.target){
+                        return false 
+                }
+                return true
+            })
+    }
+
     var edgesAttached = function(Edges, Ids){
         //Returns edges that are attached to specified nodes through Ids
         // :: Edges, Ids -> Edges
@@ -75,6 +87,14 @@ function treemapGraphD3(d3){
             return exports
         }
         return edgeComparator
+    }
+
+    exports.removeEdgeFromEdges = function(){
+        if (arguments.length > 0){
+            removeEdgeFromEdges = arguments[0]
+            return exports
+        }
+        return removeEdgeFromEdges
     }
 
     exports.edgeLinkSelector = function(){
