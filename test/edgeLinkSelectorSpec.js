@@ -22,7 +22,9 @@ describe('Default edgeLinkSelector', function(){
                 '$observed': {},
                 'reduce': function(reducer){
                     this.$observed.reducer = reducer
-                    return 'reduceResponse'
+                    return {
+                        source:'reduceResponseSource', 
+                        target:'reduceResponseTarget'}
                 }
             } 
             mockComparator = jasmine.createSpy() 
@@ -33,7 +35,8 @@ describe('Default edgeLinkSelector', function(){
 
             it('should be results of Edges reduce function', function(){
 
-                expect(results).toBe('reduceResponse')
+                expect(results[0]).toBe('reduceResponseSource')
+                expect(results[1]).toBe('reduceResponseTarget')
 
             })
 
