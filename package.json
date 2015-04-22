@@ -1,0 +1,33 @@
+{
+  "name": "Treemap-Graph-D3",
+  "version": "1.0.0",
+  "description": "A graphing tool that takes a D3.js selection and a graph, and attaches a Treemap layout from the graph.",
+  "main": "treemap-graph-d3.js",
+  "scripts": {
+    "test": "./node_modules/jasmine/bin/jasmine.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jfarid27/Treemap-Graph-D3.git"
+  },
+  "keywords": [
+    "data",
+    "visualization",
+    "javascript",
+    "graph",
+    "layout",
+    "d3"
+  ],
+  "author": "J. Farid",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jfarid27/Treemap-Graph-D3/issues"
+  },
+  "homepage": "https://github.com/jfarid27/Treemap-Graph-D3",
+  "dependencies": {
+    "d3": "^3.5.5"
+  },
+  "devDependencies": {
+    "jasmine": "^2.2.1"
+  }
+}
