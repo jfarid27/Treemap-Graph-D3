@@ -65,6 +65,81 @@ function treemapGraphD3(d3){
         return [winner.source, winner.target]
     }
 
+    var normalizeEdges = function(Edges, Ids, newId){
+        //Returns list of edges with newId replacing Ids
+        // :: Edges, Ids, Id -> Edges
+
+        return Edges.map(function(edge){
+            return {
+                'source': (Ids.indexOf(edge.source) > -1) ? newId : edge.source,
+                'target': (Ids.indexOf(edge.target) > -1) ? newId : edge.target,
+                'value': edge.value
+            }
+        })
+    }
+
+    var removeSelfArcs = function(Edges){
+        //Returns Edges with all self arcs removed
+        // :: Edges -> Edges
+        
+        return Edges.filter(function(edge){
+            return !(edge.source == edge.target)
+        })
+
+    }
+
+    var mergeSimilarEdges = function(Edges){
+        //Returns Edges with all similar edges condensed with values specified
+        //  by linkageStrategy
+        //  :: Edges -> Edges
+
+        return Edges.reduce(function(checked, next){
+
+            var nonMatching = checked.filter(function(edge){
+                return !(edge.source == next.source && 
+                    edge.target == next.target)
+            })
+
+            var matching = checked.filter(function(edge){
+                return !(edge.source == next.source && 
+                    edge.target == next.target)
+            })
+
+            if (matching){
+                matching[0]
+                    .value = exports.linkageStrategy(matching.value, next.value)
+            } 
+
+            return nonMatching.concat(matching)
+            
+        }, [])
+
+    }
+
+    exports.mergeSimilarEdges = function(){
+        if (arguments.length > 0){
+            mergeSimilarEdges = arguments[0]
+            return exports
+        }
+        return mergeSimilarEdges 
+    }
+
+    exports.removeSelfArcs = function(){
+        if (arguments.length > 0){
+            removeSelfArcs = arguments[0]
+            return exports
+        }
+        return removeSelfArcs 
+    }
+
+    exports.normalizeEdges = function(){
+        if (arguments.length > 0){
+            normalizeEdges = arguments[0]
+            return exports
+        }
+        return normalizeEdges
+    }
+
     exports.edgesAttached = function(){
         if (arguments.length > 0){
             edgesAttached = arguments[0]
