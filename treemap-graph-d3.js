@@ -159,10 +159,10 @@ function treemapGraphD3(d3){
 
     }
 
-    var mergeSimilarEdges = function(Edges){
+    var mergeSimilarEdges = function(Edges, linkageStrategy){
         //Returns Edges with all similar edges condensed with values specified
         //  by linkageStrategy
-        //  :: Edges -> Edges
+        //  :: Edges, linkageStrategy -> Edges
 
         return Edges.reduce(function(checked, next){
 
@@ -172,13 +172,13 @@ function treemapGraphD3(d3){
             })
 
             var matching = checked.filter(function(edge){
-                return !(edge.source == next.source && 
+                return (edge.source == next.source && 
                     edge.target == next.target)
             })
 
             if (matching){
                 matching[0]
-                    .value = exports.linkageStrategy(matching.value, next.value)
+                    .value = linkageStrategy(matching.value, next.value)
             } 
 
             return nonMatching.concat(matching)

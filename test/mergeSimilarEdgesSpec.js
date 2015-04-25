@@ -12,49 +12,109 @@ describe('Default mergeSimilarEdges', function(){
 
     describe('when given edges', function(){
 
-        var mockEdges 
+        var mockEdges, result, linkageStrategy
         beforeEach(function(){
 
             mockEdges = {
                 '$obsv':{},
                 reduce: function(reducer){
                     this.$obsv.reducer = reducer
+                    return 'reduceResponse'
                 }
             }
+            mockLinkageStrategy = function(){
+                return "linkageStrategyResponse"
+            }
+            result = merger(mockEdges, mockLinkageStrategy)
 
         })
 
-        it('should return reducer response')
+        it('should return reducer response', function(){
+            expect(result).toBe('reduceResponse')
+        })
         describe('edge reducer', function(){
+
+            var reducer
+            beforeEach(function(){
+                reducer = mockEdges.$obsv.reducer
+            })
             describe('when given a checked edges list and an edge', function(){
 
-                var checkedEdges 
+                var result, checked, mockNext, concatArgument 
                 beforeEach(function(){
-                    checkedEdges = {
+                    checked = {
+                        'values': [
+                            [{
+                                'value': undefined, 
+                            }],
+                            {
+                                'concat':function(edges){
+                                    concatArgument = edges 
+                                    return 'concatResponse'
+                                }
+                            }
+                        ],
                         '$obsv': {'filterer': []},
                         'filter': function(filterer){
                             this.$obsv.filterer.push(filterer)
-                            return {
-                                'value': undefined, 
-                                'concat':function(){
-                                    return 'concatResponse'
-                                }
-                                
-                            }
+                            return this.values.pop()
                         }
                     }
+                    mockNext = { 
+                        'source':'mockSource', 
+                        'target':'mockTarget' 
+                    }
+                    result = reducer(checked, mockNext) 
+                })
+                it('should return result of nonMatching concat', function(){
+                    expect(result).toBe('concatResponse')
                 })
 
-                it('should return result of nonMatching concat')
                 describe('nonMatching filter', function(){
-                    it("should return edges that don't match next")
+                    var filter
+                    beforeEach(function(){
+                        filter = checked.$obsv.filterer[0]
+                    })
+                    describe('when given edge that matches next', function(){
+                        var mockEdge, result
+                        beforeEach(function(){
+                            mockEdge = {
+                                'source': 'mockSource', 
+                                'target': 'mockTarget'
+                            }
+                            result = filter(mockEdge)
+                        })
+                        it('should return false', function(){
+                            expect(result).toBe(false)
+                        })
+                    })
                 })
+
                 describe('matching filter', function(){
-                    it("should return edges that match next")
+                    var filter
+                    beforeEach(function(){
+                        filter = checked.$obsv.filterer[1]
+                    })
+                    describe('when given edge that matches next', function(){
+                        var mockEdge, result
+                        beforeEach(function(){
+                            mockEdge = {
+                                'source': 'mockSource', 
+                                'target': 'mockTarget'
+                            }
+                            result = filter(mockEdge)
+                        })
+                        it('should return true', function(){
+                            expect(result).toBe(true)
+                        })
+                    })
                 })
 
                 describe('matching edge value', function(){
-                    it('should be the result of linkageStrategy')
+                    it('should be the result of linkageStrategy', function(){
+                        expect(concatArgument[0].value)
+                            .toBe('linkageStrategyResponse')
+                    })
                 })
 
             })
