@@ -4,6 +4,77 @@ function treemapGraphD3(d3){
         return
     }
 
+    var hierarchicalCluster = function(graph, edgeLinkSelector, 
+        edgeComparator, edgesAttached, normalizeEdges){
+      
+        var nodeRoot = {};
+        
+        graph.nodes.map(function(node){
+            nodeRoot[node.id.toString()] = node;
+        });
+        
+        var edgesList = Object.create(graph.edges);
+        
+        while (Object.keys(nodeRoot).length > 1){
+        
+            var mergingNodes = edgeLinkSelector(edgesList, edgeComparator);
+        
+            var edgesLinkedToMerging = edgesAttached(edgesList, mergingNodes)
+                .filter(function(edge){
+                    return !( 
+                        (edge.source == mergingNodes[0] && edge.target == mergingNodes[1]) ||
+                        (edge.source == mergingNodes[1] && edge.target == mergingNodes[0]) )
+                })
+        
+            //build new edge table using tournament
+            var newNodeId = exports.randomId()
+            newEdges = normalizeEdges(edgesLinkedToMerging, mergingEdges, newNodeId)
+                .filter(function(edge){
+                    return !(edge.source == edge.target)
+                })
+
+            //make new node
+
+            var newNode = {
+                id:randomId(), 
+                children: mergingNodes.map(function(index){
+                    return Object.create(nodeRoot[index])
+                })
+            };
+
+            //delete old nodes
+             mergingNodes.map(function(index){
+                 delete nodeRoot[index]
+             });
+
+            //add new node to nodeRoot
+            nodeRoot[newNode.id] = newNode;
+
+            //delete edges that link to old node
+            edgesList = edgesList.filter(function(edge){
+                
+                //if edge is collapsing edge remove
+                if (mergingNodes.indexOf(edge.source.toString()) >= 0 && 
+                    mergingNodes.indexOf(edge.target.toString()) >= 0 ) {
+                    return false
+                }
+                //if edge is linked to a merging edge, remove
+                if (mergingNodes.indexOf(edge.source.toString()) >= 0 || 
+                    mergingNodes.indexOf(edge.target.toString()) >= 0 ) {
+                    return false
+                }
+                
+                //else keep
+                return true
+            }).concat(newEdges)           
+         }; // End loop
+
+        //Return nodeRoot
+        return nodeRoot[Object.keys(nodeRoot)[0]]
+        
+        
+    }; // End function
+
     var removeEdgeFromEdges = function(Edges, Edge){
         //Returns Edges that do not match Edge
         // :: Edges, Edge -> Edges
@@ -16,13 +87,13 @@ function treemapGraphD3(d3){
             })
     }
 
-    var edgesAttached = function(Edges, Ids){
+    var edgesAttached = function(Edges, Ids, edgeAttachedToNode){
         //Returns edges that are attached to specified nodes through Ids
-        // :: Edges, Ids -> Edges
+        // :: Edges, Ids, edgeAttachedToNode -> Edges
         return Edges.filter(function(edge){
 
             return Ids.map(function(id){
-                return exports.edgeAttachedToNode(id, edge)
+                return edgeAttachedToNode(id, edge)
             })
             .reduce(function(statement, bool){
                 return statement || bool

@@ -2,11 +2,11 @@ var treemapGraphD3 = require('./../treemap-graph-d3.js')
 
 describe('Default edgesAttached', function(){
 
-    var instance, edgesAttached 
+    var instance, edgesAttached, edgeAttachedToNode
     beforeEach(function(){
         instance = treemapGraphD3({})
         edgesAttached = instance.edgesAttached()
-        instance.edgeAttachedToNode = 
+        edgeAttachedToNode = 
             function(){ return 'edgeAttachedToNodeResult'}
     })
     describe('when given edges and ids', function(){
@@ -33,7 +33,7 @@ describe('Default edgesAttached', function(){
                     return 'filterResponse'
                 }
             }
-            result = edgesAttached(mockEdges, mockIds)
+            result = edgesAttached(mockEdges, mockIds, edgeAttachedToNode)
         })
         it('should return the result of edge filter', function(){
             expect(result).toBe('filterResponse')
