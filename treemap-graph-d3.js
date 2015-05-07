@@ -159,29 +159,35 @@ function treemapGraphD3(d3){
 
     }
 
-    var mergeSimilarEdges = function(Edges){
+    var mergeSimilarEdges = function(Edges, linkageStrategy){
         //Returns Edges with all similar edges condensed with values specified
         //  by linkageStrategy
         //  :: Edges -> Edges
 
         return Edges.reduce(function(checked, next){
 
-            var nonMatching = checked.filter(function(edge){
-                return !(edge.source == next.source && 
-                    edge.target == next.target)
-            })
+            var edgesThat = checked.reduce(function(edgesThat, edge){
 
-            var matching = checked.filter(function(edge){
-                return !(edge.source == next.source && 
-                    edge.target == next.target)
-            })
+                if (!(edge.source == next.source && 
+                    edge.target == next.target)){
+                    edgesThat.dontMatch.push(edge)
 
-            if (matching){
-                matching[0]
-                    .value = exports.linkageStrategy(matching.value, next.value)
+                } else {
+                    edgesThat.match.push(edge)
+                } 
+                return edgesThat
+            }, {'match':[], 'dontMatch':[]})
+
+            if (edgesThat.match.length > 0){
+
+                edgesThat.dontMatch.push({
+                    'source': edgesThat.match[0].source, 
+                    'target': edgesThat.match[0].target, 
+                    'value': linkageStrategy(edgesThat.match[0].value, next.value)
+                }) 
             } 
 
-            return nonMatching.concat(matching)
+            return edgesThat.dontMatch 
             
         }, [])
 
