@@ -19,6 +19,10 @@ describe('Default mergeSimilarEdges', function(){
                     return 'reduceResponse'
                 }
             }
+            mockLinkageStrategy = function(){
+                return "linkageStrategyResponse"
+            }
+            result = merger(mockEdges, mockLinkageStrategy)
 
             linkageStrategy = function(j, k){
                 return 'linkageStrategyResponse'   
@@ -33,6 +37,11 @@ describe('Default mergeSimilarEdges', function(){
         })
 
         describe('edge reducer', function(){
+
+            var reducer
+            beforeEach(function(){
+                reducer = mockEdges.$obsv.reducer
+            })
             describe('when given a checked edges list and an edge', function(){
 
                 var checkedEdges, mockEdge, pushedEdge, result
