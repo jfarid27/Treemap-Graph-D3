@@ -1,19 +1,17 @@
 function treemapGraphD3(d3){
 
-    var exports = function(graph){
+    var exports = function(graph, selection){
 
         var self = this
 
-        return hierarchicalCluster(graph, mergeSimilarEdges, linkageStrategy, 
-            edgeLinkSelector, edgeComparator, edgesAttached,
-            edgeAttachedToNode, normalizeEdges, randomId, removeSelfArcs,
-            removeEdgeFromEdges, removeEdgesLinkedToNode)
+        return hierarchicalCluster(graph, mergeSimilarEdges, 
+        linkageStrategy, edgeLinkSelector, edgeComparator, normalizeEdges, 
+        randomId, removeSelfArcs, mergeNodes)
     }
 
     var hierarchicalCluster = function(graph, mergeSimilarEdges, 
-        linkageStrategy, edgeLinkSelector, edgeComparator, edgesAttached, 
-        edgeAttachedToNode, normalizeEdges, randomId, removeSelfArcs,
-        removeEdgeFromEdges, removeEdgesLinkedToNode){
+        linkageStrategy, edgeLinkSelector, edgeComparator, normalizeEdges, 
+        randomId, removeSelfArcs, mergeNodes){
 
         //Generate associative array for nodes
         var nodeRoot = graph.nodes.reduce(function(nodeRoot, node){
@@ -25,50 +23,18 @@ function treemapGraphD3(d3){
        
         while (Object.keys(nodeRoot).length > 1){
         
-            var mergingNodes = edgeLinkSelector(edgesList, edgeComparator);
-
-            //Generate edges linked to merging but remove merging edges
-            var edgesLinkedToMerging = removeEdgeFromEdges(
-                removeEdgeFromEdges(
-                    edgesAttached(edgesList, mergingNodes, edgeAttachedToNode)
-                , {source:mergingNodes[1], target:mergingNodes[0]})
-            , {source:mergingNodes[0], target:mergingNodes[1]})
+            var mergingNodeIds = edgeLinkSelector(edgesList, edgeComparator);
 
             var newNodeId = randomId()
 
-            var newEdges 
-                = removeSelfArcs(
-                    normalizeEdges(
-                        edgesLinkedToMerging, mergingNodes, newNodeId))
+            edgesList 
+                = mergeSimilarEdges(
+                    removeSelfArcs(
+                        normalizeEdges(
+                            edgesList, mergingNodeIds, newNodeId))
+                , linkageStrategy)
 
-            //make new node
-
-            var newNode = {
-                id: newNodeId, 
-                children: mergingNodes.map(function(index){
-                    return nodeRoot[index]
-                })
-            }
-
-            //delete old nodes
-            mergingNodes.map(function(index){
-                delete nodeRoot[index]
-            })
-
-
-            //add new node to nodeRoot
-            nodeRoot[newNode.id] = newNode;
-
-            //delete edges that link to old nodes
-            edgesList = removeEdgesLinkedToNode(
-                removeEdgesLinkedToNode(edgesList, mergingNodes[1])
-            , mergingNodes[0])
-
-            //concat new edges to edges list
-            var newCombinedEdges = edgesList.concat(newEdges)
-
-            //merge edges using linkage strategy
-            edgesList = mergeSimilarEdges(newCombinedEdges, linkageStrategy)
+            nodeRoot = mergeNodes(mergingNodeIds, nodeRoot, newNodeId)
 
          } // End loop
 
@@ -77,6 +43,24 @@ function treemapGraphD3(d3){
         
         
     }; // End function
+
+    var mergeNodes = function(Ids, nodeRoot, newId){
+        //Returns nodeRoot with given node ids merged into a node with id
+        //specified by newId
+        // Ids, NodeRoot, Id -> NodeRoot
+
+        nodeRoot[newId] = {
+            id: newId, 
+            children: Ids.map(function(id){
+                return nodeRoot[id]
+            })
+        }
+
+        return Ids.reduce(function(nodeRoot, id){
+            delete nodeRoot[id]
+            return nodeRoot
+        }, nodeRoot)
+    }
 
     var removeEdgesLinkedToNode = function(Edges, Id){
         //Returns Edges that are not connected to node specified by Id
@@ -232,6 +216,14 @@ function treemapGraphD3(d3){
             return exports
         }
         return removeEdgesLinkedToNode 
+    }
+
+    exports.mergeNodes = function(){
+        if (arguments.length > 0){
+            mergeNodes = arguments[0]
+            return exports
+        }
+        return mergeNodes 
     }
 
     exports.linkageStrategy = function(){
