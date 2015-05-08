@@ -1,79 +1,94 @@
 function treemapGraphD3(d3){
 
-    var exports = function(){
-        return
+    var exports = function(graph){
+
+        var self = this
+
+        return hierarchicalCluster(graph, mergeSimilarEdges, linkageStrategy, 
+            edgeLinkSelector, edgeComparator, edgesAttached,
+            edgeAttachedToNode, normalizeEdges, randomId, removeSelfArcs,
+            removeEdgeFromEdges, removeEdgesLinkedToNode)
     }
 
-    var hierarchicalCluster = function(graph, edgeLinkSelector, 
-        edgeComparator, edgesAttached, normalizeEdges){
-      
-        var nodeRoot = {};
-        
-        graph.nodes.map(function(node){
+    var hierarchicalCluster = function(graph, mergeSimilarEdges, 
+        linkageStrategy, edgeLinkSelector, edgeComparator, edgesAttached, 
+        edgeAttachedToNode, normalizeEdges, randomId, removeSelfArcs,
+        removeEdgeFromEdges, removeEdgesLinkedToNode){
+
+        //Generate associative array for nodes
+        var nodeRoot = graph.nodes.reduce(function(nodeRoot, node){
             nodeRoot[node.id.toString()] = node;
-        });
-        
-        var edgesList = Object.create(graph.edges);
-        
+            return nodeRoot
+        }, {})
+
+        var edgesList = graph.edges
+       
         while (Object.keys(nodeRoot).length > 1){
         
             var mergingNodes = edgeLinkSelector(edgesList, edgeComparator);
-        
-            var edgesLinkedToMerging = edgesAttached(edgesList, mergingNodes)
-                .filter(function(edge){
-                    return !( 
-                        (edge.source == mergingNodes[0] && edge.target == mergingNodes[1]) ||
-                        (edge.source == mergingNodes[1] && edge.target == mergingNodes[0]) )
-                })
-        
-            //build new edge table using tournament
-            var newNodeId = exports.randomId()
-            newEdges = normalizeEdges(edgesLinkedToMerging, mergingEdges, newNodeId)
-                .filter(function(edge){
-                    return !(edge.source == edge.target)
-                })
+
+            //Generate edges linked to merging but remove merging edges
+            var edgesLinkedToMerging = removeEdgeFromEdges(
+                removeEdgeFromEdges(
+                    edgesAttached(edgesList, mergingNodes, edgeAttachedToNode)
+                , {source:mergingNodes[1], target:mergingNodes[0]})
+            , {source:mergingNodes[0], target:mergingNodes[1]})
+
+            var newNodeId = randomId()
+
+            var newEdges 
+                = removeSelfArcs(
+                    normalizeEdges(
+                        edgesLinkedToMerging, mergingNodes, newNodeId))
 
             //make new node
 
             var newNode = {
-                id:randomId(), 
+                id: newNodeId, 
                 children: mergingNodes.map(function(index){
-                    return Object.create(nodeRoot[index])
+                    return nodeRoot[index]
                 })
-            };
+            }
 
             //delete old nodes
-             mergingNodes.map(function(index){
-                 delete nodeRoot[index]
-             });
+            mergingNodes.map(function(index){
+                delete nodeRoot[index]
+            })
+
 
             //add new node to nodeRoot
             nodeRoot[newNode.id] = newNode;
 
-            //delete edges that link to old node
-            edgesList = edgesList.filter(function(edge){
-                
-                //if edge is collapsing edge remove
-                if (mergingNodes.indexOf(edge.source.toString()) >= 0 && 
-                    mergingNodes.indexOf(edge.target.toString()) >= 0 ) {
-                    return false
-                }
-                //if edge is linked to a merging edge, remove
-                if (mergingNodes.indexOf(edge.source.toString()) >= 0 || 
-                    mergingNodes.indexOf(edge.target.toString()) >= 0 ) {
-                    return false
-                }
-                
-                //else keep
-                return true
-            }).concat(newEdges)           
-         }; // End loop
+            //delete edges that link to old nodes
+            edgesList = removeEdgesLinkedToNode(
+                removeEdgesLinkedToNode(edgesList, mergingNodes[1])
+            , mergingNodes[0])
+
+            //concat new edges to edges list
+            var newCombinedEdges = edgesList.concat(newEdges)
+
+            //merge edges using linkage strategy
+            edgesList = mergeSimilarEdges(newCombinedEdges, linkageStrategy)
+
+         } // End loop
 
         //Return nodeRoot
         return nodeRoot[Object.keys(nodeRoot)[0]]
         
         
     }; // End function
+
+    var removeEdgesLinkedToNode = function(Edges, Id){
+        //Returns Edges that are not connected to node specified by Id
+        // :: Edges, Id -> Edges
+            return Edges.filter(function(edge){
+                if (edge.source == Id 
+                    || edge.target == Id){
+                        return false 
+                }
+                return true
+            })
+    }
 
     var removeEdgeFromEdges = function(Edges, Edge){
         //Returns Edges that do not match Edge
@@ -166,31 +181,73 @@ function treemapGraphD3(d3){
 
         return Edges.reduce(function(checked, next){
 
+            if (checked.length == 0){
+                return [next]
+            }
+
             var edgesThat = checked.reduce(function(edgesThat, edge){
 
                 if (!(edge.source == next.source && 
                     edge.target == next.target)){
                     edgesThat.dontMatch.push(edge)
-
                 } else {
                     edgesThat.match.push(edge)
                 } 
                 return edgesThat
             }, {'match':[], 'dontMatch':[]})
 
+            var noDuplicateEdges = edgesThat.dontMatch
+
             if (edgesThat.match.length > 0){
 
-                edgesThat.dontMatch.push({
+                noDuplicateEdges.push({
                     'source': edgesThat.match[0].source, 
                     'target': edgesThat.match[0].target, 
                     'value': linkageStrategy(edgesThat.match[0].value, next.value)
                 }) 
-            } 
+            } else {
+                noDuplicateEdges.push(next)
+            }
 
-            return edgesThat.dontMatch 
-            
+            return noDuplicateEdges 
         }, [])
 
+    }
+
+    var randomId = function(){
+        // Returns random string
+        // :: () -> String
+        return Math.random().toString()
+    }
+
+    var linkageStrategy = function(val1, val2){
+        //Returns number
+        // :: Number, Number -> Number
+        return Math.max(val1, val2)
+    }
+
+    exports.removeEdgesLinkedToNode = function(){
+        if (arguments.length > 0){
+            removeEdgesLinkedToNode = arguments[0]
+            return exports
+        }
+        return removeEdgesLinkedToNode 
+    }
+
+    exports.linkageStrategy = function(){
+        if (arguments.length > 0){
+            linkageStrategy = arguments[0]
+            return exports
+        }
+        return linkageStrategy 
+    }
+
+    exports.randomId = function(){
+        if (arguments.length > 0){
+            randomId = arguments[0]
+            return exports
+        }
+        return randomId 
     }
 
     exports.mergeSimilarEdges = function(){
