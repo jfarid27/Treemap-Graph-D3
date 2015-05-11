@@ -34,6 +34,8 @@ Arguments: d3
 treemapper(graph, d3Selection)
 
 Applies hierarchical clustering to graph and attaches treemap to d3Selection. Returns nothing.
+
+
 Arguments: Graph, [D3 Selection](https://github.com/mbostock/d3/wiki/Selections)
 
 ## Updating Default Parameters
@@ -41,32 +43,45 @@ Arguments: Graph, [D3 Selection](https://github.com/mbostock/d3/wiki/Selections)
 ####treemapper.<b>settings.x</b>(parameters)
 
 Used to update margin and width of visualization. Returns treemapper for method chaining.
+
+
 Arguments: Object with 'margin' and 'width' properties.
+
 
 ####treemapper.<b>settings.y</b>(parameters)
 
 Used to update margin and width of visualization. Returns treemapper for method chaining.
+
+
 Arguments: Object with 'margin' and 'width' properties.
 
 ####treemapper.<b>mode</b>(mode)
 
 Used to update [treemap mode](https://github.com/mbostock/d3/wiki/Treemap-Layout#mode). Returns treemapper for method chaining.
+
+
 Arguments: String
 
-####treemapper.<b>colorEdgeByGroup</b>(mode)
+####treemapper.<b>colorEdgeByGroup</b>(bool)
 
  
 If given nodes in graph have a 'group' property, and mode is set to true, this will color edges between nodes of similar group with the same color. Returns treemapper for method chaining.
+
+
 Arguments: Boolean
 
 ####treemapper.<b>linkageStrategy</b>(function)
 
 Replaces default complete linkage strategy of hierarchical clustering algorithm. Returns treemapper for method chaining.
+
+
 Arguments: Function
 
 ####treemapper.<b>edgeComparator</b>(function)
 
 Replaces default edge comparator of hierarchical clustering algorithm. This function should define edges as a partially ordered set and will define "greatest" edge. Returns treemapper for method chaining.
+
+
 Arguments: Function
 
 ##Basic Type Manifest
