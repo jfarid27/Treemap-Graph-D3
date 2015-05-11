@@ -510,6 +510,15 @@ function treemapGraphD3(d3){
         return normalizeEdges
     }
 
+    exports.hierarchicalCluster = function(){
+        if (arguments.length > 0){
+            hierarchicalCluster = arguments[0]
+            return exports
+        }
+        return hierarchicalCluster
+    }
+
+
     exports.edgesAttached = function(){
         if (arguments.length > 0){
             edgesAttached = arguments[0]
