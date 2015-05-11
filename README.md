@@ -2,7 +2,7 @@
 
 A treemap based graph layout visualization using D3 based off of the method presented by Chris Muelder and Kwan-Liu Ma.
 
-[Link to original paper](http://www.cs.ucdavis.edu/~ma/papers/EuroVis06_YueWang.pdf))
+[Link to original paper](http://vis.cs.ucdavis.edu/papers/2008-pacificvis-treemaplayout-final.pdf)
 
 ## Basic Usage
 
