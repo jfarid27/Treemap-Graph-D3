@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+</head>
+    <body>
+
+        <div id="visualization">
+            <svg id="vis-svg" width="900" height="800"></svg>
+        </div>
+
+        <script charset="utf-8" src="node_modules/d3/d3.min.js"></script>
+        <script>
+           var module = {'exports':undefined} 
+        </script>
+        <script src="treemap-graph-d3.js"></script>
+        <script>
+
+            d3.json('data/miserables.json', function(err, data){
+
+                //add id to data just to make it a node
+                data.nodes = data.nodes.map(function(node, index){
+                    node.id = index.toString()
+                    return node
+                })
+                
+                var svg = d3.select("#vis-svg")
+
+                var treemap = module.exports(d3)
+                    .settings.x({'margin':10, 'width':880}) 
+                    .settings.y({'margin':10, 'width':780}) 
+                    .settings.colorEdgeByGroup(true)
+                    .settings.mode('squarify')
+
+                treemap(data, svg)
+
+            })
+        </script>
+    </body>
+</html>
