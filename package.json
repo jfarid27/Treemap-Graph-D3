@@ -1,6 +1,6 @@
 {
-  "name": "Treemap-Graph-D3",
-  "version": "1.0.0",
+  "name": "treemap-graph-d3",
+  "version": "1.0.1",
   "description": "A graphing tool that takes a D3.js selection and a graph, and attaches a Treemap layout from the graph.",
   "main": "treemap-graph-d3.js",
   "scripts": {
