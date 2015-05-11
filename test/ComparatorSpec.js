@@ -18,8 +18,8 @@ describe('Default Comparator', function(){
                 mockEdge2 = {'value': 1}
                 result = comparator(mockEdge1, mockEdge2)
             })
-            it('should return true', function(){
-                expect(result).toBe(true)
+            it('should return false', function(){
+                expect(result).toBe(false)
             })
         })
         describe('where edge2 is greater than edge1', function(){
@@ -29,8 +29,8 @@ describe('Default Comparator', function(){
                 mockEdge2 = {'value': 2}
                 result = comparator(mockEdge1, mockEdge2)
             })
-            it('should return false', function(){
-                expect(result).toBe(false)
+            it('should return true', function(){
+                expect(result).toBe(true)
             })
         })
 
