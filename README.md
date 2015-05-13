@@ -103,6 +103,11 @@ type Graph :: Edges, Nodes
 
 type LinkageStrategy :: Number, Number -> Number
 type EdgeComparator :: Edge, Edge -> Boolean  
+
+type NodeIndex :: {
+    [Id :: Node]
+}
+
 ```
 
 
