@@ -11,7 +11,7 @@ describe('Default nodeIndexReduce', function(){
 
         var mockEdgeLinkSelector, mockEdgeComparator, mockMergeSimilarEdges,
         mockRemoveSelfArcs, mockNormalizeEdges, mockLinkageStrategy,
-        mockRandomId, mockMergeNodes
+        mockRandomId, mockMergeNodes, mockAddNode, mockDeleteNode
         beforeEach(function(){
 
             mockLinkageStrategy = 'mockLinkageStrategy'
@@ -31,18 +31,31 @@ describe('Default nodeIndexReduce', function(){
             mockEdgeLinkSelector = function(){
                 return 'edgeLinkSelectorResponse'
             }
+
+            mockAddNode = function(){
+                return 'mockAddNodeResponse'
+            }
+            mockDeleteNode = function(){
+                return 'mockDeleteNodeResponse'
+            }
         })
 
-        describe('if nodeIndex is minimal', function(){
+        describe('if nodeIndex is empty', function(){
 
-            var mockNodeIndex, mockEdgesList, result
+            var mockNodeIndex, mockEdgesList, result, mockIsEmpty,
+            mockIsMinimal
             beforeEach(function(){
 
+                mockIsEmpty = function(){ return true }
+
                 mockNodeIndex = {}
+
                 mockEdgesList = []
+
                 result = reducer(mockNodeIndex, mockEdgesList, mockEdgeLinkSelector,
                     mockEdgeComparator, mockMergeSimilarEdges, mockRemoveSelfArcs, 
-                    mockNormalizeEdges, mockLinkageStrategy, mockRandomId, mockMergeNodes)
+                    mockNormalizeEdges, mockLinkageStrategy, mockRandomId, mockMergeNodes,
+                    mockAddNode, mockDeleteNode, mockIsMinimal, mockIsEmpty)
             })
             it('should return null', function(){
                 expect(result).toBeNull()
@@ -50,14 +63,18 @@ describe('Default nodeIndexReduce', function(){
         })
 
         describe('if nodeIndex is minimal', function(){
-            var mockNodeIndex, mockEdgesList, result
+            var mockNodeIndex, mockEdgesList, result, 
+            mockIsMinimal, mockIsEmpty
             beforeEach(function(){
 
+                mockIsEmpty = function(){ return false }
+                mockIsMinimal = function(){ return true }
                 mockNodeIndex = {'foo': 'bar'}
                 mockEdgesList = []
                 result = reducer(mockNodeIndex, mockEdgesList, mockEdgeLinkSelector,
                     mockEdgeComparator, mockMergeSimilarEdges, mockRemoveSelfArcs, 
-                    mockNormalizeEdges, mockLinkageStrategy, mockRandomId, mockMergeNodes)
+                    mockNormalizeEdges, mockLinkageStrategy, mockRandomId, mockMergeNodes,
+                    mockAddNode, mockDeleteNode, mockIsMinimal, mockIsEmpty)
             })
             it('should return null', function(){
                 expect(result.foo).toBe('bar')

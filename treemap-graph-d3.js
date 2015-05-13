@@ -7,9 +7,10 @@ function treemapGraphD3(d3){
 
         var vis = selection.append('g').classed('d3-treemap-graph', true)
 
-        var cluster = hierarchicalCluster(graph, mergeSimilarEdges, 
-        linkageStrategy, edgeLinkSelector, edgeComparator, normalizeEdges, 
-        randomId, removeSelfArcs, mergeNodes, indexNodes, nodeIndexReduce)
+        var cluster = hierarchicalCluster(graph, indexNodes, nodeIndexReduce, 
+            edgeLinkSelector, edgeComparator, mergeSimilarEdges, removeSelfArcs,
+            normalizeEdges, linkageStrategy, randomId, mergeNodes, addNodeToIndex, deleteNode,
+            isMinimal, isEmpty, nodeIndexToTree)
 
         var treemap = d3.layout.treemap()
             .size([settings.x.width, settings.y.width])
@@ -79,7 +80,6 @@ function treemapGraphD3(d3){
         }
     }
 
-    
     function edgeColor(treemapNodePositions){
         //Utility function for graphing algorithm
 
@@ -149,9 +149,10 @@ function treemapGraphD3(d3){
     }
 
 
-    var hierarchicalCluster = function(graph, mergeSimilarEdges, 
-        linkageStrategy, edgeLinkSelector, edgeComparator, normalizeEdges, 
-        randomId, removeSelfArcs, mergeNodes, indexNodes, nodeIndexReduce){
+    var hierarchicalCluster = function(graph, indexNodes, nodeIndexReduce, 
+            edgeLinkSelector, edgeComparator, mergeSimilarEdges, removeSelfArcs,
+            normalizeEdges, linkageStrategy, randomId, mergeNodes, addNodeToIndex, deleteNode,
+            isMinimal, isEmpty, nodeIndexToTree){
         //Clustering algorithm to generate hierarchical tree for treemap
         // :: Graph, MergeSimilarEdges, ... -> Tree
 
@@ -160,36 +161,79 @@ function treemapGraphD3(d3){
 
         var finalIndex = nodeIndexReduce(nodeIndex, edgesList, 
             edgeLinkSelector, edgeComparator, mergeSimilarEdges, removeSelfArcs,
-            normalizeEdges, linkageStrategy, randomId, mergeNodes)
+            normalizeEdges, linkageStrategy, randomId, mergeNodes, addNodeToIndex, deleteNode,
+            isMinimal, isEmpty)
 
-        return finalIndex[Object.keys(finalIndex)[0]]
+        return nodeIndexToTree(finalIndex, isMinimal)
         
     }; 
 
     var indexNodes = function(nodes){
         //Returns nodeIndex from given nodes
         // :: Nodes -> NodeIndex
-        return nodes.reduce(function(nodeIndex, node){
-            nodeIndex[node.id.toString()] = node;
-            return nodeIndex
-        }, {})
+            return nodes.reduce(function(nodeIndex, node){
+                nodeIndex[node.id.toString()] = node;
+                return nodeIndex
+            }, {})
     }
 
+    var nodeIndexToTree = function(nodeIndex, isMinimal){
+    //Returns tree given from specified nodeIndex
+    //  :: NodeIndex, IsMinimal -> Tree | Null
+        if(isMinimal(nodeIndex)){
+            return nodeIndex[Object.keys(nodeIndex)[0]]
+        }
+
+        return null
+    }
+
+    var isMinimal = function(nodeIndex){
+        //Returns Boolean representing test if ndoeIndex is minimal enough to
+        //be transformed into a tree
+        // :: NodeIndex -> Bool
+        return !(Object.keys(nodeIndex).length != 1)
+    }
+
+    var addNodeToIndex = function(nodeIndex, node){
+        //Returns NodeIndex with given node appended
+        // :: NodeIndex, Node -> NodeIndex
+        nodeIndex[node.id] = node
+        return nodeIndex 
+    }
+
+    var retrieveNode = function(nodeIndex, id){
+        //Returns Node with given ID from nodeIndex
+        // :: NodeIndex, Id -> Node
+            return nodeIndex[id]
+    }
+
+    var deleteNode = function(nodeIndex, id){
+        //Returns NodeIndex with given ID in nodeIndex removed
+        // :: NodeIndex, Id -> NodeIndex
+            delete nodeIndex[id]
+            return nodeIndex
+    }
+
+    var isEmpty = function(nodeIndex){
+        //Returns boolean if nodeIndex is empty
+        // :: NodeIndex -> Boolean
+        return (Object.keys(nodeIndex).length <= 0)
+    }
 
     var nodeIndexReduce = function(nodeIndex, edgesList,
             edgeLinkSelector, edgeComparator, mergeSimilarEdges, removeSelfArcs,
-            normalizeEdges, linkageStrategy, randomId, mergeNodes){
+            normalizeEdges, linkageStrategy, randomId, mergeNodes, addNode, deleteNode,
+            isMinimal, isEmpty){
         //Recursive reducer for given node index and edgesList
-        // :: NodeIndex, Edges -> NodeRoot
+        // :: NodeIndex, Edges, ... -> NodeRoot
 
-        if (Object.keys(nodeIndex).length < 1){
+        if (isEmpty(nodeIndex)){
             return null
         }
 
-        if (Object.keys(nodeIndex).length == 1){
-            return nodeIndex
+        if (isMinimal(nodeIndex)){
+            return nodeIndex 
         }
-
 
         var mergingNodeIds = edgeLinkSelector(edgesList, edgeComparator);
 
@@ -202,20 +246,20 @@ function treemapGraphD3(d3){
                         edgesList, mergingNodeIds, newNodeId))
             , linkageStrategy)
 
-        var newNodeIndex = mergeNodes(mergingNodeIds, nodeIndex, newNodeId)
+        var newNodeIndex = mergeNodes(mergingNodeIds, nodeIndex, newNodeId, addNode, deleteNode)
 
         return nodeIndexReduce(newNodeIndex, newEdgesList,
             edgeLinkSelector, edgeComparator, mergeSimilarEdges, removeSelfArcs,
-            normalizeEdges, linkageStrategy, randomId, mergeNodes)
+            normalizeEdges, linkageStrategy, randomId, mergeNodes, addNode, deleteNode, isMinimal, isEmpty)
 
     }
 
-    var mergeNodes = function(Ids, nodeIndex, newId){
+    var mergeNodes = function(Ids, nodeIndex, newId, addNode, deleteNode){
         //Returns nodeIndex with given node ids merged into a node with id
         //specified by newId
         // Ids, NodeIndex, Id -> NodeIndex
 
-        nodeIndex[newId] = {
+        var newNode = {
             id: newId, 
             children: Ids.map(function(id){
                 return nodeIndex[id]
@@ -223,9 +267,8 @@ function treemapGraphD3(d3){
         }
 
         return Ids.reduce(function(nodeIndex, id){
-            delete nodeIndex[id]
-            return nodeIndex
-        }, nodeIndex)
+            return deleteNode(nodeIndex, id)
+        }, addNode(nodeIndex, newNode))
     }
 
     var removeEdgesLinkedToNode = function(Edges, Id){
