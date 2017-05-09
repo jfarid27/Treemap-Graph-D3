@@ -273,6 +273,9 @@ function treemapGraphD3(d3){
     var edgeLinkSelector = function(Edges, Comparator){
         //Returns list of Ids to merge after given Edges and Comparator
         // :: Edges, Comparator -> [Id, Id]
+        if (!Edges || !Comparator) {
+            return null;
+        }
         var winner = Edges.reduce(function(leader, next){
             if (Comparator(leader, next)){
                 return leader

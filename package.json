@@ -25,9 +25,9 @@
   },
   "homepage": "https://github.com/jfarid27/Treemap-Graph-D3",
   "dependencies": {
-    "d3": "^3.5.5"
+    "d3": "^4.8.0"
   },
   "devDependencies": {
-    "jasmine": "^2.2.1"
+    "jasmine": "^2.6.0"
   }
 }

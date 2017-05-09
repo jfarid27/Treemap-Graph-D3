@@ -10,7 +10,7 @@ describe('Default edgeLinkSelector', function(){
 
     describe('when given no Edges or Comparator', function(){
         it('should return null', function(){
-            pending('TODO')
+            expect(selector()).toBeNull()
         })
     })
 
