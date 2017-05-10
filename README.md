@@ -2,6 +2,8 @@
 
 A treemap based graph layout visualization using D3 based off of the method presented by Chris Muelder and Kwan-Liu Ma.
 
+[JSFiddle Example](https://jsfiddle.net/jrab227/XqJX8/)
+
 [Link to original paper](http://vis.cs.ucdavis.edu/papers/2008-pacificvis-treemaplayout-final.pdf)
 
 ## Basic Usage
@@ -22,14 +24,14 @@ treemapper(graph, svg)
 
 ```
 
-##Instantiation
+## Instantiation
 
 treemapGraph(d3)
 
 Returns treemapper function.
 Arguments: d3
 
-##Running
+## Running
 
 treemapper(graph, d3Selection)
 
@@ -40,7 +42,7 @@ Arguments: Graph, [D3 Selection](https://github.com/mbostock/d3/wiki/Selections)
 
 ## Updating Default Parameters
 
-####treemapper.<b>settings.x</b>(parameters)
+#### treemapper.<b>settings.x</b>(parameters)
 
 Used to update margin and width of visualization. Returns treemapper for method chaining.
 
@@ -48,21 +50,21 @@ Used to update margin and width of visualization. Returns treemapper for method 
 Arguments: Object with 'margin' and 'width' properties.
 
 
-####treemapper.<b>settings.y</b>(parameters)
+#### treemapper.<b>settings.y</b>(parameters)
 
 Used to update margin and width of visualization. Returns treemapper for method chaining.
 
 
 Arguments: Object with 'margin' and 'width' properties.
 
-####treemapper.<b>mode</b>(mode)
+#### treemapper.<b>mode</b>(mode)
 
 Used to update [treemap mode](https://github.com/mbostock/d3/wiki/Treemap-Layout#mode). Returns treemapper for method chaining.
 
 
 Arguments: String
 
-####treemapper.<b>colorEdgeByGroup</b>(bool)
+#### treemapper.<b>colorEdgeByGroup</b>(bool)
 
  
 If given nodes in graph have a 'group' property, and mode is set to true, this will color edges between nodes of similar group with the same color. Returns treemapper for method chaining.
@@ -70,21 +72,21 @@ If given nodes in graph have a 'group' property, and mode is set to true, this w
 
 Arguments: Boolean
 
-####treemapper.<b>linkageStrategy</b>(function)
+#### treemapper.<b>linkageStrategy</b>(function)
 
 Replaces default complete linkage strategy of hierarchical clustering algorithm. Returns treemapper for method chaining.
 
 
 Arguments: Function
 
-####treemapper.<b>edgeComparator</b>(function)
+#### treemapper.<b>edgeComparator</b>(function)
 
 Replaces default edge comparator of hierarchical clustering algorithm. This function should define edges as a partially ordered set and will define "greatest" edge. Returns treemapper for method chaining.
 
 
 Arguments: Function
 
-##Basic Type Manifest
+## Basic Type Manifest
 
 ```Haskell
 
